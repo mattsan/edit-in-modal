@@ -9,15 +9,23 @@ class ArticlesController < ApplicationController
   end
 
   def create
+    article = article.new(article_params)
+    status = if article.save
+               200
+             else
+               400
+             end
+    render json: article.to_json(methods: :errors), status: status
   end
 
   def update
     article = Article.find(params[:id])
-    if article.update(article_params)
-      render nothing: true, status: 200
-    else
-      render nothing: true, status: 400
-    end
+    status = if article.update(article_params)
+               200
+             else
+               400
+             end
+    render json: article.to_json(methods: :errors), status: status
   end
 
   def destroy

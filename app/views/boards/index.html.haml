@@ -51,7 +51,7 @@
         %button.btn.btn-default{type: 'button', data: {dismiss: 'modal'}} CLOSE
 
 :javascript
-  var updateArticlePicker = function(url) {
+  var updateArticlePicker = function(url, article_id) {
     var picker = $('#article-picker');
     if(url) {
       picker.data('url', url);
@@ -66,6 +66,9 @@
         option.text(articles[i].title + ' by ' + articles[i].author);
         option.data(articles[i]);
         picker.append(option);
+      }
+      if(article_id) {
+        picker.val(article_id);
       }
       picker.change();
     }).fail(function(xhr) {
@@ -96,7 +99,7 @@
       _method: 'put'
     };
     $.post('/articles/' + option.val(), params, function(res) {
-      updateArticlePicker();
+      updateArticlePicker(null, res.id);
     }).fail(function(xhr) {
       alert(xhr.status);
     });
