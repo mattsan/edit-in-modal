@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController
   def index
-    articles = Board.find(params[:board_id]).articles
+    articles = Board.find(params[:board_id]).articles.order(:id)
     respond_to do |format|
       format.json do
         render json: articles
