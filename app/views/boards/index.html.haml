@@ -12,7 +12,7 @@
           %button.btn.btn-default
             編集
         %td
-          %button.btn.btn-default{data: {toggle: 'modal', target: '#article-edit', board: board.id, url: board_articles_path(board, format: :json)}}
+          %button.btn.btn-default{data: {toggle: 'modal', target: '#article-edit', board_id: board.id, url: board_articles_path(board, format: :json)}}
             記事を編集
 
 .modal.fade#article-edit{role: 'dialog'}
@@ -26,6 +26,7 @@
       .modal-body
         = form_for Article.new, class: 'form-horizontal' do |f|
           .row.form-group
+            %input#article_board_id{type: 'hidden'}
             .col-sm-3
               %label.control-label 記事選択
             .col-sm-9
@@ -47,6 +48,7 @@
               = f.text_area :body, class: 'form-control'
       .modal-footer
         .pull-left
+          %button.btn.btn-default#new-article{type: 'button'} NEW
           %button.btn.btn-primary#save-article{type: 'button'} SAVE
         %button.btn.btn-default{type: 'button', data: {dismiss: 'modal'}} CLOSE
 
@@ -78,10 +80,12 @@
 
   $('#article-edit').on('show.bs.modal', function(event) {
     var target = $(event.relatedTarget);
+    $('#article_board_id').val(target.data('boardId'));
     updateArticlePicker(target.data('url'));
   });
 
   $('#article-picker').on('change', function(event) {
+    $(this).children(':not(:selected)[value=new]').remove();
     var option = $(this).children(':selected');
     $('#article_title').val(option.data('title'));
     $('#article_author').val(option.data('author'));
@@ -92,15 +96,26 @@
     var option = $('#article-picker').children(':selected');
     var params = {
       article: {
-        title:  $('#article_title').val(),
-        author: $('#article_author').val(),
-        body:   $('#article_body').val()
+        title:    $('#article_title').val(),
+        author:   $('#article_author').val(),
+        body:     $('#article_body').val(),
+        board_id: $('#article_board_id').val()
       },
-      _method: 'put'
+      _method: option.val() == 'new' ? 'post' : 'put'
     };
-    $.post('/articles/' + option.val(), params, function(res) {
+    $.post('/articles/' + (option.val() == 'new' ? '' : option.val()), params, function(res) {
       updateArticlePicker(null, res.id);
     }).fail(function(xhr) {
       alert(xhr.status);
     });
+  });
+
+  $('#new-article').on('click', function(event) {
+    var picker = $('#article-picker');
+    var option = $('<option>');
+    option.text('new article');
+    option.val('new');
+    picker.append(option);
+    picker.val('new');
+    picker.change();
   });

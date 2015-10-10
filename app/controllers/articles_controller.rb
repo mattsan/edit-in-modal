@@ -9,7 +9,7 @@ class ArticlesController < ApplicationController
   end
 
   def create
-    article = article.new(article_params)
+    article = Article.new(article_params)
     status = if article.save
                200
              else
@@ -34,6 +34,6 @@ class ArticlesController < ApplicationController
   private
 
   def article_params
-    params.require('article').permit(%w(title author body))
+    params.require('article').permit(%w(title author body board_id))
   end
 end
