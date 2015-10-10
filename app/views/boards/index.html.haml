@@ -1,2 +1,103 @@
-%h1 Boards#index
-%p Find me in app/views/boards/index.html.haml
+%table.table
+  %thead
+    %tr
+      %th ボード名
+      %th
+      %th
+  %tbody
+    - @boards.each do |board|
+      %tr
+        %td= board.name
+        %td
+          %button.btn.btn-default
+            編集
+        %td
+          %button.btn.btn-default{data: {toggle: 'modal', target: '#article-edit', board: board.id, url: board_articles_path(board, format: :json)}}
+            記事を編集
+
+.modal.fade#article-edit{role: 'dialog'}
+  .modal-dialog{role: 'document'}
+    .modal-content
+      .modal-header
+        %button.close{data: {dismiss: 'modal'}, aria: {label: 'Close'}}
+          %span{aria: {hidden: true}}
+            &times;
+        %h4 EDIT ARTICES
+      .modal-body
+        = form_for Article.new, class: 'form-horizontal' do |f|
+          .row.form-group
+            .col-sm-3
+              %label.control-label 記事選択
+            .col-sm-9
+              %select.form-control#article-picker
+          .row.form-group
+            .col-sm-3
+              = f.label :title, class: 'control-label'
+            .col-sm-9
+              = f.text_field :title, class: 'form-control'
+          .row.form-group
+            .col-sm-3
+              = f.label :author, class: 'control-label'
+            .col-sm-9
+              = f.text_field :author, class: 'form-control'
+          .row.form-group
+            .col-sm-3
+              = f.label :body, class: 'control-label'
+            .col-sm-9
+              = f.text_area :body, class: 'form-control'
+      .modal-footer
+        .pull-left
+          %button.btn.btn-primary#save-article{type: 'button'} SAVE
+        %button.btn.btn-default{type: 'button', data: {dismiss: 'modal'}} CLOSE
+
+:javascript
+  var updateArticlePicker = function(url) {
+    var picker = $('#article-picker');
+    if(url) {
+      picker.data('url', url);
+    } else {
+      url = picker.data('url');
+    }
+    $.get(url, function(articles) {
+      picker.children().remove();
+      for(var i in articles) {
+        var option = $('<option>');
+        option.val(articles[i].id);
+        option.text(articles[i].title + ' by ' + articles[i].author);
+        option.data(articles[i]);
+        picker.append(option);
+      }
+      picker.change();
+    }).fail(function(xhr) {
+      alert(xhr.status);
+    });
+  };
+
+  $('#article-edit').on('show.bs.modal', function(event) {
+    var target = $(event.relatedTarget);
+    updateArticlePicker(target.data('url'));
+  });
+
+  $('#article-picker').on('change', function(event) {
+    var option = $(this).children(':selected');
+    $('#article_title').val(option.data('title'));
+    $('#article_author').val(option.data('author'));
+    $('#article_body').val(option.data('body'));
+  });
+
+  $('#save-article').on('click', function(event) {
+    var option = $('#article-picker').children(':selected');
+    var params = {
+      article: {
+        title:  $('#article_title').val(),
+        author: $('#article_author').val(),
+        body:   $('#article_body').val()
+      },
+      _method: 'put'
+    };
+    $.post('/articles/' + option.val(), params, function(res) {
+      updateArticlePicker();
+    }).fail(function(xhr) {
+      alert(xhr.status);
+    });
+  });
