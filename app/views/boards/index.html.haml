@@ -12,7 +12,7 @@
           %button.btn.btn-default
             編集
         %td
-          %button.btn.btn-default{data: {toggle: 'modal', target: '#article-edit', board_id: board.id, url: board_articles_path(board, format: :json)}}
+          %button.btn.btn-default{data: {toggle: 'modal', target: '#article-edit', keyboard: 'false', backdrop: 'static', board_id: board.id, url: board_articles_path(board, format: :json)}}
             記事を編集
 
 .modal.fade#article-edit{role: 'dialog'}
